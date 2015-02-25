@@ -1,0 +1,27 @@
+{ "register": [
+	{
+        "createdAt": "2014-11-16T22:18:38.567Z",
+        "feed": "global",
+        "objectId": "Ytx16Layo9",
+        "status": {
+            "__type": "Pointer",
+            "className": "Activity",
+            "objectId": "shQGnI1lJW"
+        },
+        "updatedAt": "2014-11-16T22:18:38.567Z",
+        "username": "Bosshard"
+    },
+	{
+        "createdAt": "2014-11-16T22:18:38.575Z",
+        "feed": "global",
+        "objectId": "N1ogwkw1hZ",
+        "status": {
+            "__type": "Pointer",
+            "className": "Activity",
+            "objectId": "9LwDTKOHsm"
+        },
+        "updatedAt": "2014-11-16T22:18:38.575Z",
+        "username": "kushondra"
+    }
+    ]
+}
