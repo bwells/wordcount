@@ -2,50 +2,44 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"os"
-	"strings"
 )
 
-func maker(filename string) (*bufio.Reader, chan string, error) {
+func producer(reader *bufio.Reader) <-chan string {
 
 	c := make(chan string)
 
-	f, err := os.Open(filename)
+	go func() {
+		for {
+			line, err := reader.ReadSlice('\n')
 
-	if err != nil {
-		return nil, nil, err
-	}
+			if err == io.EOF {
+				close(c)
+				return
+			}
 
-	defer f.Close()
+			if err != nil {
+				close(c)
+				fmt.Println(err)
+				return
+			}
 
-	reader := bufio.NewReader(f)
+			prefix := []byte("            \"objectId\": ")
 
-	return reader, c, nil
+			if len(line) > 35 && bytes.Equal(line[:24], prefix) {
+				id := string(line[25:35])
+				c <- id
+			}
+		}
+	}()
+
+	return c
 }
 
-func producer(reader *bufio.Reader, c chan string) {
-
-	for {
-		str, err := reader.ReadString('\n')
-
-		if err != nil {
-			close(c)
-			return
-		}
-
-		if strings.HasPrefix(str, "            \"objectId\": ") {
-			id := str[25:35]
-
-			c <- id
-
-			// counts[id] += 1
-		}
-	}
-
-}
-
-func consumer(c chan string) map[string]int {
+func consumer(c <-chan string) map[string]int {
 
 	counts := make(map[string]int)
 
@@ -59,14 +53,23 @@ func consumer(c chan string) map[string]int {
 func main() {
 	filename := os.Args[1]
 
-	reader, c, err := maker(filename)
+	f, err := os.Open(filename)
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error: ", err)
 		return
 	}
 
-	go producer(reader, c)
+	defer f.Close()
+
+	reader := bufio.NewReader(f)
+
+	if err != nil {
+		fmt.Println("Error: ", err)
+		return
+	}
+
+	c := producer(reader)
 
 	counts := consumer(c)
 
